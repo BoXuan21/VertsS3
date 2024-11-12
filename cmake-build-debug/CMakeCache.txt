@@ -157,7 +157,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=Verts
+CMAKE_PROJECT_NAME:STATIC=myfind
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=C:/Users/Bo Xuan Yang/AppData/Local/Programs/CLion/bin/mingw/bin/ranlib.exe
@@ -243,6 +243,15 @@ CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
+Project_BINARY_DIR:STATIC=C:/Users/Bo Xuan Yang/CLionProjects/Verts/cmake-build-debug
+
+//Value Computed by CMake
+Project_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+Project_SOURCE_DIR:STATIC=C:/Users/Bo Xuan Yang/CLionProjects/Verts
+
+//Value Computed by CMake
 Verts_BINARY_DIR:STATIC=C:/Users/Bo Xuan Yang/CLionProjects/Verts/cmake-build-debug
 
 //Value Computed by CMake
@@ -250,6 +259,15 @@ Verts_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 Verts_SOURCE_DIR:STATIC=C:/Users/Bo Xuan Yang/CLionProjects/Verts
+
+//Value Computed by CMake
+myfind_BINARY_DIR:STATIC=C:/Users/Bo Xuan Yang/CLionProjects/Verts/cmake-build-debug
+
+//Value Computed by CMake
+myfind_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+myfind_SOURCE_DIR:STATIC=C:/Users/Bo Xuan Yang/CLionProjects/Verts
 
 
 ########################

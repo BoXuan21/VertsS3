@@ -6,56 +6,47 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <cstring>
 
 // Helper function: toLowerCase
-// Used to convert a string to lowercase, making it easier to implement case-insensitive search
+// Converts a string to lowercase for case-insensitive comparison
 void toLowerCase(std::string &str) {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-    // std::begin and end used as iterators to specify start and end of the string
-    // ::tolower converts each character to lowercase
+    // std::transform applies ::tolower to each character from start to end of the string
 }
 
 // Main function to search for files
-// directory: current directory where we're looking
-// filename: target filename
-// recursive: boolean flag indicating if search should be recursive
-// caseInsensitive: boolean flag for case-insensitive search
+// directory: current directory to search in
+// filename: target filename to search
+// recursive: if true, search subdirectories as well
+// caseInsensitive: if true, perform a case-insensitive match
 void findFile(const std::string &directory, const std::string &filename, bool recursive, bool caseInsensitive) {
-    DIR *dir = opendir(directory.c_str());
-    // opendir opens the directory and returns a pointer to DIR
-
-    if (!dir) {
+    DIR *dir = opendir(directory.c_str()); // Open the directory
+    if (!dir) { // Error handling if directory can't be opened
         std::cerr << "Error: Cannot open directory " << directory << std::endl;
         return;
     }
 
     struct dirent *entry;
-    // readdir reads the next directory entry and returns a pointer to a dirent struct
-    // which represents a file or a subdirectory
     while ((entry = readdir(dir)) != nullptr) {
         std::string entryName = entry->d_name;
 
-        // Skip the current directory and parent directory entries
+        // Skip the current directory (.) and parent directory (..)
         if (entryName == "." || entryName == "..") {
             continue;
         }
 
-        // Construct the full path of the entry by appending its name to the directory path
+        // Construct the full path of the entry
         std::string fullPath = directory + "/" + entryName;
         struct stat pathStat;
-        // stat() retrieves information about the file specified by fullPath and stores it in pathStat
-        stat(fullPath.c_str(), &pathStat);
+        stat(fullPath.c_str(), &pathStat); // Get file metadata
 
+        // Check if entry is a directory and if recursive search is enabled
         if (S_ISDIR(pathStat.st_mode) && recursive) {
-            // If entry is a directory and recursive search is enabled, create a child process
-            if (fork() == 0) {  // Child process
-                findFile(fullPath, filename, recursive, caseInsensitive);
-                exit(0);  // Exit child process after completing the recursive search
-            }
-            wait(NULL);  // Parent process waits for the child to finish
+            // Recursive call without forking since subdirectory exploration is handled in a single process
+            findFile(fullPath, filename, recursive, caseInsensitive);
         }
-        else if (S_ISREG(pathStat.st_mode)) {
-            // If entry is a regular file
+        else if (S_ISREG(pathStat.st_mode)) { // Check if entry is a regular file
             std::string searchName = filename;
             std::string targetName = entryName;
 
@@ -65,25 +56,73 @@ void findFile(const std::string &directory, const std::string &filename, bool re
                 toLowerCase(targetName);
             }
 
-            // Check if the file matches the filename we're searching for
+            // If the file matches the filename being searched for, print the result
             if (searchName == targetName) {
                 std::cout << getpid() << ": " << filename << ": " << fullPath << std::endl;
+                // Format: <pid>: <filename>: <full path>
             }
         }
     }
 
-    closedir(dir);  // Close the directory after processing all entries
+    closedir(dir); // Close the directory after processing all entries
 }
 
+// Main program to initiate parallel search processes for each filename
+// This function forks a new process for each filename to search in parallel
 int main(int argc, char *argv[]) {
-    bool recursive = false;
-    bool caseInsensitive = false;
-    std::string searchPath;
-    std::vector<std::string> filenames;
+    // Explanation:
+    // 1. This program creates a child process for each filename provided.
+    // 2. Each child process performs a file search in the specified directory
+    //    (and subdirectories if -R is enabled).
+    // 3. The parent waits for all child processes to prevent "zombie" processes.
 
-    //to-Do Parsing Argument
-    //for each filename, fork a process and search
-    //and need to wait for the chuld process to finish
+    bool recursive = false;         // Flag for recursive search
+    bool caseInsensitive = false;   // Flag for case-insensitive search
+    std::string searchPath;         // Directory to search in
+    std::vector<std::string> filenames; // List of filenames to search
+
+    // Parse command-line arguments using getopt
+    int opt;
+    while ((opt = getopt(argc, argv, "Ri")) != -1) {
+        switch (opt) {
+            case 'R':
+                recursive = true;
+                break;
+            case 'i':
+                caseInsensitive = true;
+                break;
+            default:
+                std::cerr << "Usage: " << argv[0] << " [-R] [-i] <searchpath> <filename1> [filename2] ...\n";
+                return 1;
+        }
+    }
+
+    // Collect search path and filenames from remaining arguments
+    if (optind < argc) {
+        searchPath = argv[optind++]; // First remaining argument is the search path
+        while (optind < argc) {
+            filenames.push_back(argv[optind++]); // Remaining arguments are filenames
+        }
+    } else {
+        std::cerr << "Error: Missing required arguments <searchpath> and filenames.\n";
+        return 1;
+    }
+
+    // Fork child processes to search for each filename
+    for (const auto &filename : filenames) {
+        pid_t pid = fork();
+        if (pid == 0) {  // Child process
+            findFile(searchPath, filename, recursive, caseInsensitive);
+            exit(0);  // Exit child after finishing
+        }
+        else if (pid < 0) { // Error handling for fork failure
+            std::cerr << "Error: Failed to fork for filename " << filename << std::endl;
+            return 1;
+        }
+    }
+
+    // Parent process waits for all child processes to finish
+    while (wait(nullptr) > 0); // Wait for all child processes
 
     return 0;
 }
