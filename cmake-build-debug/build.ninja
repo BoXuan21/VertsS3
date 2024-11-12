@@ -51,7 +51,7 @@ build cmake_object_order_depends_target_myfind: phony || .
 
 build CMakeFiles/myfind.dir/myfind.cpp.obj: CXX_COMPILER__myfind_unscanned_Debug C$:/Users/Bo$ Xuan$ Yang/CLionProjects/Verts/myfind.cpp || cmake_object_order_depends_target_myfind
   DEP_FILE = CMakeFiles\myfind.dir\myfind.cpp.obj.d
-  FLAGS = -g -std=gnu++17 -fdiagnostics-color=always
+  FLAGS = -g -std=gnu++17 -fdiagnostics-color=always -D_POSIX_C_SOURCE=200809L
   OBJECT_DIR = CMakeFiles\myfind.dir
   OBJECT_FILE_DIR = CMakeFiles\myfind.dir
 

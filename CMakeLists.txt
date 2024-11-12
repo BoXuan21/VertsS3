@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(myfind)
-
 set(CMAKE_CXX_STANDARD 17)
-
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+add_compile_options(-D_POSIX_C_SOURCE=200809L)
 add_executable(myfind myfind.cpp)

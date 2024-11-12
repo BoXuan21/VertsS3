@@ -6,7 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
-#include <cstring>
+#include <sys/wait.h>
 
 // Helper function: toLowerCase
 // Converts a string to lowercase for case-insensitive comparison
@@ -110,7 +110,8 @@ int main(int argc, char *argv[]) {
 
     // Fork child processes to search for each filename
     for (const auto &filename : filenames) {
-        pid_t pid = fork();
+        pid_t pid;
+        pid = fork();
         if (pid == 0) {  // Child process
             findFile(searchPath, filename, recursive, caseInsensitive);
             exit(0);  // Exit child after finishing
